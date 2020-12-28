@@ -13,6 +13,7 @@ from models.scReduction import ScReduction
 from utils.dataset import *
 from utils.visualization import *
 
+
 METHODS = ["sc-only", "bulk-only", "bulk-sc", "bulk-sc-aug"]
 
 
@@ -54,38 +55,40 @@ def main():
         sc_matrix, labels = load_sc_data(args)
         sc_model = ScReduction(args, sc_matrix, labels)
 
-    # bulk data and model
-    bulk_W = None
-    if args.method != "sc-only":
-        save_dir = os.path.join(args.result_dir, args.task_name)
-        bulk_aux_file = os.path.join(save_dir, "bulk_model_{}.pickle".format(args.gamma))
-        if os.path.exists(bulk_aux_file):
-            print("load pre-trained bulk model from {}".format(bulk_aux_file))
-            with open(bulk_aux_file, "rb") as f:
-                bulk_model = pickle.load(f)
-            bulk_W = bulk_model.get_w()
+        # bulk data and model
+        bulk_W = None
+        if args.method != "sc-only":
+            save_dir = os.path.join(args.result_dir, args.task_name)
+            bulk_aux_file = os.path.join(save_dir, "bulk_model_{}.pickle".format(args.gamma))
+            if os.path.exists(bulk_aux_file):
+                print("load pre-trained bulk model from {}".format(bulk_aux_file))
+                with open(bulk_aux_file, "rb") as f:
+                    bulk_model = pickle.load(f)
+                bulk_W = bulk_model.get_w()
+            else:
+                print("Initialize bulk model.")
+                bulk_matrix = load_bulk_data(args)
+                bulk_model = BulkReduction(args, bulk_matrix)
+
+        # train
+        if args.method == "sc-only":
+            sc_model.train()
         else:
-            print("Initialize bulk model.")
-            bulk_matrix = load_bulk_data(args)
-            bulk_model = BulkReduction(args, bulk_matrix)
+            if bulk_W is None:
+                bulk_model.train()
+                save_model(bulk_model, args, "bulk")
+                bulk_W = bulk_model.get_w()
 
-    # train
-    if args.method == "sc-only":
-        sc_model.train()
-    else:
-        if bulk_W is None:
-            bulk_model.train()
-            save_model(bulk_model, args, "bulk")
-            bulk_W = bulk_model.get_w()
-
-        sc_model.set_bulk_W(bulk_W)
-        sc_model.train()
-        save_model(sc_model, args, "sc")
+            sc_model.set_bulk_W(bulk_W)
+            sc_model.train()
+            save_model(sc_model, args, "sc")
 
     # visualization
+    print("reduce dimension for visualization...")
     sc_H = sc_model.get_h()
     tsne_trans = TSNE(n_components=2)
     sc_tsne = tsne_trans.fit_transform(sc_H.T)
+    print("reduce over.")
     pic_path = os.path.join(args.result_dir, args.task_name, args.method, "sc_{}.png".format(suffix))
     draw_and_save_figure(sc_tsne, labels, pic_path)
 

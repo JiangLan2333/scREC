@@ -19,7 +19,7 @@ class ScReduction(object):
         self.K = args.K
         self.W = np.random.random(size=(self.M, self.K))
         self.H = np.random.random(size=(self.K, self.N))
-        self.Z = np.random.random(size=(self.N, self.N))
+        self.Z = np.eye(self.N)
         self.bulk_W = bulk_W
         self.e = np.array([1] * self.K).reshape(-1, 1)
         self.gamma = args.gamma
@@ -49,6 +49,7 @@ class ScReduction(object):
                     self.H)))
             self.Z = self.Z * ((multi_dot([self.X.T, self.W, self.H]) + self.delta * self.H.T.dot(self.H)) / (
                         multi_dot([self.X.T, self.X, self.Z]) + self.delta * self.Z))
+            print(self.Z)
         else:
             raise KeyError("No method called: ", self.args.method)
 
