@@ -7,6 +7,7 @@
 + delta
 
 ## quick start
+pip install -r requirements.txt
 python run_reduction.py --task_name TASK_NAME --method METHOD
 
 ### TASK_NAME
