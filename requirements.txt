@@ -1,0 +1,7 @@
+numpy==1.18.5
+hdf5storage==0.1.15
+pandas==1.1.0
+matplotlib==3.3.0
+seaborn==0.11.1
+progressbar33==2.4
+scikit_learn==0.24.0
