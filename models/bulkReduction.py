@@ -7,8 +7,7 @@
 import numpy as np
 from numpy.linalg import multi_dot
 import progressbar
-import os
-import pickle
+import torch
 
 
 class BulkReduction(object):
@@ -23,16 +22,30 @@ class BulkReduction(object):
         self.upd_time = args.upd_time
         self.args = args
 
+    def prepare_input(self):
+        self.X = torch.from_numpy(self.X).float().cuda()
+        self.W = torch.from_numpy(self.W).float().cuda()
+        self.H = torch.from_numpy(self.H).float().cuda()
+        self.e = torch.from_numpy(self.e).float().cuda()
+
+    def release(self):
+        self.X = self.X.cpu().numpy()
+        self.W = self.W.cpu().numpy()
+        self.H = self.H.cpu().numpy()
+        self.e = self.e.cpu().numpy()
+
     def update(self):
-        self.W = self.W * (self.X.dot(self.H.T) / multi_dot([self.W, self.H, self.H.T]))
-        self.H = self.H * (self.W.T.dot(self.X) / (
-                    multi_dot([self.W.T, self.W, self.H]) + self.gamma * multi_dot([self.e, self.e.T, self.H])))
+        self.W = self.W * (self.X.mm(self.H.T) / self.W.mm(self.H).mm(self.H.T))
+        self.H = self.H * (self.W.T.mm(self.X) / (
+                   self.W.T.mm(self.W).mm(self.H) + self.gamma * self.e.mm(self.e.T).mm(self.H)))
 
     def train(self):
-        print("bulk model start training...")
         p = progressbar.ProgressBar()
+        self.prepare_input()
+        print("bulk model start training...")
         for _ in p(range(self.upd_time)):
             self.update()
+        self.release()
         print("bulk model train over.")
 
     def get_w(self):
