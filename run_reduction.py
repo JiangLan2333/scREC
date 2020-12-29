@@ -105,7 +105,7 @@ def main():
     np.savetxt(os.path.join(sc_save_dir, 'sc_labels.out'), labels, delimiter=',', fmt="%s")
     print("save H, TSNE, labels for single cells over.")
     # visualization
-    pic_path = os.path.join(args.result_dir, args.task_name, args.method, "sc_{}.png".format(suffix))
+    pic_path = os.path.join(args.result_dir, args.task_name, args.method, "sc_{}.pdf".format(suffix))
     draw_and_save_figure(sc_tsne, labels, pic_path)
 
 

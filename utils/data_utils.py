@@ -10,7 +10,7 @@ import pickle
 import hdf5storage
 import numpy as np
 
-TASKS2FILES = {"tissue": ["tissue4_forebrain.mat", "MCA_bulk_mat.mat"],
+TASKS2FILES = {"stissue": ["tissue4_forebrain.mat", "MCA_bulk_mat.mat"],
                "forebrain": ["forebrain_half.mat", "forebrain_bulk_mat.mat"],
                "gmvshek": ["GMvsHek.mat", "GMvsHek_AllRO_bulk_mat.mat"],
                "gmvshl": ["GMvsHL.mat", "GMvsHL_AllRO_bulk_mat.mat"],
@@ -21,7 +21,7 @@ def load_sc_data(args):
     aux_dir = os.path.join(args.aux_dir, args.task_name)
     aux_matrix_file = os.path.join(aux_dir, "sc_matrix.pickle")
     aux_label_file = os.path.join(aux_dir, "sc_label.pickle")
-    if os.path.exists(aux_matrix_file) and os.path.exists(aux_label_file):
+    if os.path.exists(aux_matrix_file) and os.path.exists(aux_label_file) and args.task_name != "tissue":
         print("load sc data from aux file {} and {}".format(aux_matrix_file, aux_label_file))
         with open(aux_matrix_file, "rb") as f:
             matrix = pickle.load(f)
