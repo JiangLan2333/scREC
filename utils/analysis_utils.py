@@ -48,7 +48,7 @@ def run_louvain(sc_data, sc_labels, range_min=0, range_max=3, max_steps=30):
     ami = adjusted_mutual_info_score(adata.obs['label'], adata.obs['louvain'])
     homo = homogeneity_score(adata.obs['label'], adata.obs['louvain'])
     print('Louvain:\tARI: %.3f, AMI: %.3f, Homo: %.3f' % (ari, ami, homo))
-    return (adata.obs['label'], adata.obs['louvain'], ari, ami, homo)
+    return adata.obs['label'], adata.obs['louvain'], ari, ami, homo
 
 
 def fetch_low_dimension_data(model_path):

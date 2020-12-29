@@ -10,7 +10,7 @@ import pickle
 import hdf5storage
 import numpy as np
 
-TASKS2FILES = {"stissue": ["tissue4_forebrain.mat", "MCA_bulk_mat.mat"],
+TASKS2FILES = {"tissue": ["tissue4_forebrain.mat", "MCA_bulk_mat.mat"],
                "forebrain": ["forebrain_half.mat", "forebrain_bulk_mat.mat"],
                "gmvshek": ["GMvsHek.mat", "GMvsHek_AllRO_bulk_mat.mat"],
                "gmvshl": ["GMvsHL.mat", "GMvsHL_AllRO_bulk_mat.mat"],

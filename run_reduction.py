@@ -12,6 +12,7 @@ from models.bulkReduction import BulkReduction
 from models.scReduction import ScReduction
 from utils.data_utils import *
 from utils.visualization import *
+from utils.analysis_utils import *
 
 
 METHODS = ["pca", "sc-only", "bulk-only", "bulk-sc", "bulk-sc-aug"]
@@ -104,9 +105,16 @@ def main():
     np.savetxt(os.path.join(sc_save_dir, 'sc_tsne.out'), sc_tsne, delimiter=',')
     np.savetxt(os.path.join(sc_save_dir, 'sc_labels.out'), labels, delimiter=',', fmt="%s")
     print("save H, TSNE, labels for single cells over.")
+
     # visualization
     pic_path = os.path.join(args.result_dir, args.task_name, args.method, "sc_{}.pdf".format(suffix))
-    draw_and_save_figure(sc_tsne, labels, pic_path)
+    if not os.path.exists(pic_path):
+        draw_and_save_figure(sc_tsne, labels, pic_path)
+
+    # cluster
+    print("run cluster...")
+    _, _, ari, ami, homo = run_louvain(sc_tsne, labels)
+    print("ari: {} ami: {} homo: {}".format(ari, ami, homo))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 numpy==1.18.5
-hdf5storage==0.1.15
-pandas==1.1.0
-matplotlib==3.3.0
 seaborn==0.11.1
+torch==1.3.0
+pandas==1.1.5
+matplotlib==3.3.0
+hdf5storage==0.1.15
 progressbar33==2.4
+scanpy==1.6.0
 scikit_learn==0.24.0
