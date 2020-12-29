@@ -8,6 +8,7 @@ import numpy as np
 import progressbar
 import torch
 from torch.nn.functional import softmax
+from sklearn.decomposition import PCA
 
 
 class ScReduction(object):
@@ -66,21 +67,29 @@ class ScReduction(object):
             self.H = self.H * ((self.W.T.mm(self.X).mm(self.Z) + self.delta * self.H.mm(self.Z + self.Z.T)) / (
                 (self.W.T.mm(self.W) + 2 * self.delta * self.H.mm(self.H.T) + self.gamma * self.e.mm(self.e.T)).mm(
                     self.H)))
-            self.Z = self.Z * ((self.X.T.mm(self.W).mm(self.H) + self.delta * self.H.T.mm(self.H)) / (
-                    self.X.T.mm(self.X).mm(self.Z) + self.delta * self.Z))
+            for _ in range(100):
+                self.Z = self.Z * ((self.X.T.mm(self.W).mm(self.H) + self.delta * self.H.T.mm(self.H)) / (
+                        self.X.T.mm(self.X).mm(self.Z) + self.delta * self.Z))
             # normalize
             self.H = softmax(self.H, dim=1)
             self.Z = softmax(self.Z, dim=0)
+        elif self.args.method == "pca":
+            pca = PCA(n_components=self.K)
+            self.H = pca.fit_transform(self.X.T).T
         else:
             raise KeyError("No method called: ", self.args.method)
 
     def train(self):
         p = progressbar.ProgressBar()
-        self.prepare_input()
-        print("sc model start training...")
-        for _ in p(range(self.upd_time)):
+        if self.args.method != "pca":
+            self.prepare_input()
+            print("sc model start training...")
+            for _ in p(range(self.upd_time)):
+                self.update()
+            self.release()
+        else:
+            print("sc model start training...")
             self.update()
-        self.release()
         print("sc model train over.")
 
     def get_w(self):

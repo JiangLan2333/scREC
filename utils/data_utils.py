@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/12/28 上午10:42
 # @Author  : Lan Jiang
-# @File    : dataset.py
+# @File    : data_utils.py
 
 import os
 import pickle
@@ -32,14 +32,14 @@ def load_sc_data(args):
         print("load sc data from origin file {}".format(file_name))
         data = hdf5storage.loadmat(os.path.join(args.data_dir, file_name))
         matrix = data['count_mat']
+        # fetch label with regards to different dataset.
         labels = np.squeeze(data['label_mat'])
-        labels = [labels[i][0] for i in range(len(labels))]
+        if args.task_name == "insilico":
+            labels = [labels[i][0] for i in range(len(labels))]
         if not os.path.exists(aux_dir):
             os.mkdir(aux_dir)
-        with open(aux_matrix_file, "wb") as f:
-            pickle.dump(matrix, f)
-        with open(aux_label_file, "wb") as f:
-            pickle.dump(labels, f)
+        pickle.dump(matrix, open(aux_matrix_file, "wb"), protocol=4)
+        pickle.dump(labels, open(aux_label_file, "wb"), protocol=4)
 
     return matrix, labels
 
@@ -68,6 +68,8 @@ def get_sc_model_suffix(args):
         suffix = '_'.join([str(args.gamma), str(args.lamb)])
     elif args.method == "bulk-sc-aug":
         suffix = '_'.join([str(args.gamma), str(args.lamb), str(args.delta)])
+    elif args.method == "pca":
+        suffix = "pca"
     else:
         suffix = None
     return suffix

@@ -5,7 +5,6 @@
 # @File    : bulkReduction.py
 
 import numpy as np
-from numpy.linalg import multi_dot
 import progressbar
 import torch
 
