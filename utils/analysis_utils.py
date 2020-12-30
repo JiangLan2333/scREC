@@ -88,7 +88,7 @@ def classification(features, labels, method="svm", k_fold=5):
 
 def run_classification():
     cluster = pd.DataFrame(columns=("task", 'method', 'acc', 'kappa', 'k-fold'))
-    for task in ["gmvshl"]:
+    for task in ["insilico", "gmvshl"]:
         aux_matrix_file = os.path.join("../aux_files", task, "sc_matrix.pickle")
         with open(aux_matrix_file, "rb") as f:
             sc_matrix = pickle.load(f)
@@ -100,17 +100,15 @@ def run_classification():
         for k in range(5):
             cluster = cluster.append([{'task': task, 'method': "H_svm", "acc": acc[k],
                                        "kappa": kappa[k], "k-fold": k + 1}], ignore_index=True)
-        print(cluster)
         # analyse X
         for method in ["svm", "knn", "rf", "dtree"]:
             acc, kappa = classification(sc_matrix.T, labels, method=method, k_fold=5)
             for k in range(5):
                 cluster = cluster.append([{'task': task, 'method': "X_" + method, "acc": acc[k],
                                            "kappa": kappa[k], "k-fold": k + 1}], ignore_index=True)
-            print(cluster)
-        return cluster
+    return cluster
 
 
 if __name__ == "__main__":
     cls_result = run_classification()
-    cls_result.to_csv("../result/gmvshl_result.csv")
+    cls_result.to_csv("../result/cls_result.csv")
