@@ -81,7 +81,7 @@ def save_model(model, args, model_type):
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
         with open(os.path.join(save_dir, "bulk_model_{}.pickle".format(args.gamma)), "wb") as f:
-            pickle.dump(model, f)
+            pickle.dump(model, f, protocol=4)
         print("save bulk model to {}.".format(os.path.join(save_dir, "bulk_model_{}.pickle".format(args.gamma))))
     elif model_type == "sc":
         save_dir = os.path.join(args.result_dir, args.task_name, args.method)
@@ -89,5 +89,5 @@ def save_model(model, args, model_type):
             os.mkdir(save_dir)
         suffix = get_sc_model_suffix(args)
         with open(os.path.join(save_dir, "sc_model_{}.pickle".format(suffix)), "wb") as f:
-            pickle.dump(model, f)
+            pickle.dump(model, f, protocol=4)
         print("save sc model to {}.".format(os.path.join(save_dir, "sc_model_{}.pickle".format(suffix))))

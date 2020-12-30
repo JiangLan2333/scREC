@@ -11,6 +11,10 @@ import scanpy as sc
 from sklearn.metrics.cluster import adjusted_mutual_info_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.metrics.cluster import homogeneity_score
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 
 def run_louvain(sc_data, sc_labels, range_min=0, range_max=3, max_steps=30):
@@ -57,3 +61,18 @@ def fetch_low_dimension_data(model_path):
     h = model.get_h()
     _, labels = model.get_data()
     return h, labels
+
+
+def classification(features, labels, method="svm", k_fold=5):
+    n_label = len(set(labels))
+    # initialize classifier
+    if method == "svm":
+        model = SVC(decision_function_shape='ovo')
+    elif method == "knn":
+        model = KNeighborsClassifier(n_neighbors=n_label)
+    elif method == "rf":
+        model = RandomForestClassifier(n_estimators=n_label)
+    elif method == "dtree":
+        model = DecisionTreeClassifier(random_state=0)
+
+    # train and eval model
