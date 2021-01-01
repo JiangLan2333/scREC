@@ -1,4 +1,4 @@
-# matrix-project
+# scREC for matrix final project
 
 ## hyper-parameters
 
