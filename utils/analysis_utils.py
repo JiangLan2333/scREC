@@ -4,20 +4,20 @@
 # @Author  : Lan Jiang
 # @File    : analysis_utils.py
 
-import pickle
-import numpy as np
 import os
-import pandas as pd
+import pickle
 
+import numpy as np
+import pandas as pd
 import scanpy as sc
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import cohen_kappa_score, accuracy_score, make_scorer
 from sklearn.metrics.cluster import adjusted_mutual_info_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.metrics.cluster import homogeneity_score
-from sklearn.metrics import cohen_kappa_score, accuracy_score, make_scorer
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 
@@ -87,28 +87,29 @@ def classification(features, labels, method="svm", k_fold=5):
 
 
 def run_classification():
-    cluster = pd.DataFrame(columns=("task", 'method', 'acc', 'kappa', 'k-fold'))
-    for task in ["insilico", "gmvshl"]:
-        aux_matrix_file = os.path.join("../aux_files", task, "sc_matrix.pickle")
-        with open(aux_matrix_file, "rb") as f:
-            sc_matrix = pickle.load(f)
+    cluster = pd.DataFrame(columns=("K", 'method', 'acc', 'kappa', 'k-fold'))
+    for k in range(10, 31, 5):
+        # aux_matrix_file = os.path.join("../aux_files", task, "sc_matrix.pickle")
+        # with open(aux_matrix_file, "rb") as f:
+        #     sc_matrix = pickle.load(f)
         # load data
-        sc_H = np.loadtxt(os.path.join("../result", task, "sc-only", "sc_H.out"), delimiter=",", dtype=float)
-        labels = np.loadtxt(os.path.join("../result", task, "sc-only", "sc_labels.out"), delimiter=",", dtype=str)
+        sc_H = np.loadtxt(os.path.join("../result", "insilico", "sc-only", "K_" + str(k), "sc_H.out"), delimiter=",",
+                          dtype=float)
+        labels = np.loadtxt(os.path.join("../result", "insilico", "sc-only", "sc_labels.out"), delimiter=",", dtype=str)
         # analyse H
         acc, kappa = classification(sc_H.T, labels, method="svm", k_fold=5)
-        for k in range(5):
-            cluster = cluster.append([{'task': task, 'method': "H_svm", "acc": acc[k],
-                                       "kappa": kappa[k], "k-fold": k + 1}], ignore_index=True)
-        # analyse X
-        for method in ["svm", "knn", "rf", "dtree"]:
-            acc, kappa = classification(sc_matrix.T, labels, method=method, k_fold=5)
-            for k in range(5):
-                cluster = cluster.append([{'task': task, 'method': "X_" + method, "acc": acc[k],
-                                           "kappa": kappa[k], "k-fold": k + 1}], ignore_index=True)
+        for i in range(5):
+            cluster = cluster.append([{'K': k, 'method': "H_svm", "acc": acc[i],
+                                       "kappa": kappa[i], "k-fold": i + 1}], ignore_index=True)
+        # # analyse X
+        # for method in ["svm", "knn", "rf", "dtree"]:
+        #     acc, kappa = classification(sc_matrix.T, labels, method=method, k_fold=5)
+        #     for k in range(5):
+        #         cluster = cluster.append([{'task': task, 'method': "X_" + method, "acc": acc[k],
+        #                                    "kappa": kappa[k], "k-fold": k + 1}], ignore_index=True)
     return cluster
 
 
 if __name__ == "__main__":
     cls_result = run_classification()
-    cls_result.to_csv("../result/cls_result.csv")
+    cls_result.to_csv("../result/K_result.csv", index=False)

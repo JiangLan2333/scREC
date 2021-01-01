@@ -37,6 +37,10 @@ def main():
     parser.add_argument('--result_dir', default="./result", type=str)
     parser.add_argument('--aux_dir', default="./aux_files", type=str)
 
+    # analysis
+    parser.add_argument('--do_visualize', action='store_true')
+    parser.add_argument('--do_cluster', action='store_true')
+
     args = parser.parse_args()
 
     print("=" * 10, "TASK: ", args.task_name, " METHOD: ", args.method, " K: ", args.K, "=" * 10)
@@ -58,7 +62,7 @@ def main():
         # bulk data and model
         bulk_W = None
         if args.method not in ["sc-only", "pca"]:
-            save_dir = os.path.join(args.result_dir, args.task_name)
+            save_dir = os.path.join(args.result_dir, args.task_name, "K_"+str(args.K))
             bulk_aux_file = os.path.join(save_dir, "bulk_model_{}.pickle".format(args.gamma))
             if os.path.exists(bulk_aux_file):
                 print("load pre-trained bulk model from {}".format(bulk_aux_file))
@@ -85,36 +89,38 @@ def main():
 
     # dimension reduction
     sc_H = sc_model.get_h()
-    if os.path.exists(os.path.join(sc_save_dir, 'sc_tsne.out')):
-        print("load TSNE result from: ", os.path.join(sc_save_dir, 'sc_tsne.out'))
-        sc_tsne = np.loadtxt(os.path.join(sc_save_dir, 'sc_tsne.out'), delimiter=",", dtype=float)
-    else:
-        print("reduce dimension for visualization...")
-        tsne_trans = TSNE(n_components=2)
-        try:
-            sc_tsne = tsne_trans.fit_transform(sc_H.T)
-            print("reduce over.")
-        except ValueError:
-            print("*" * 9, "ERROR", "*" * 9)
-            print("method {} is invalid for task {}".format(args.method, args.task_name))
-            return
-
     # save H matrix and labels for analysis
     np.savetxt(os.path.join(sc_save_dir, 'sc_H.out'), sc_H, delimiter=',')
-    np.savetxt(os.path.join(sc_save_dir, 'sc_tsne.out'), sc_tsne, delimiter=',')
     np.savetxt(os.path.join(sc_save_dir, 'sc_labels.out'), labels, delimiter=',', fmt="%s")
-    print("save H, TSNE, labels for single cells over.")
+    print("save H, labels for single cells over.")
 
     # visualization
-    pic_path = os.path.join(args.result_dir, args.task_name, args.method, "K_" + str(args.K),
-                            "sc_{}.pdf".format(suffix))
-    if not os.path.exists(pic_path):
-        draw_and_save_figure(sc_tsne, labels, pic_path)
+    if args.do_visualize:
+        if os.path.exists(os.path.join(sc_save_dir, 'sc_tsne.out')):
+            print("load TSNE result from: ", os.path.join(sc_save_dir, 'sc_tsne.out'))
+            sc_tsne = np.loadtxt(os.path.join(sc_save_dir, 'sc_tsne.out'), delimiter=",", dtype=float)
+        else:
+            print("reduce dimension for visualization...")
+            tsne_trans = TSNE(n_components=2)
+            try:
+                sc_tsne = tsne_trans.fit_transform(sc_H.T)
+                print("reduce over.")
+            except ValueError:
+                print("*" * 9, "ERROR", "*" * 9)
+                print("method {} is invalid for task {}".format(args.method, args.task_name))
+                return
+
+        np.savetxt(os.path.join(sc_save_dir, 'sc_tsne.out'), sc_tsne, delimiter=',')
+        pic_path = os.path.join(args.result_dir, args.task_name, args.method, "K_" + str(args.K),
+                                "sc_{}.pdf".format(suffix))
+        if not os.path.exists(pic_path):
+            draw_and_save_figure(sc_tsne, labels, pic_path)
 
     # cluster
-    print("run cluster...")
-    _, _, ari, ami, homo = run_louvain(sc_tsne, labels)
-    print("ari: {} ami: {} homo: {}".format(ari, ami, homo))
+    if args.do_cluster:
+        print("run cluster...")
+        _, _, ari, ami, homo = run_louvain(sc_tsne, labels)
+        print("ari: {} ami: {} homo: {}".format(ari, ami, homo))
 
 
 if __name__ == "__main__":
