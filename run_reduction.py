@@ -10,10 +10,9 @@ from sklearn.manifold import TSNE
 
 from models.bulkReduction import BulkReduction
 from models.scReduction import ScReduction
+from utils.analysis_utils import *
 from utils.data_utils import *
 from utils.visualization import *
-from utils.analysis_utils import *
-
 
 METHODS = ["pca", "sc-only", "bulk-only", "bulk-sc", "bulk-sc-aug"]
 
@@ -40,10 +39,10 @@ def main():
 
     args = parser.parse_args()
 
-    print("="*10, "TASK: ", args.task_name, " METHOD: ", args.method, "="*10)
+    print("=" * 10, "TASK: ", args.task_name, " METHOD: ", args.method, " K: ", args.K, "=" * 10)
     # load data & model
     # sc data & model
-    sc_save_dir = os.path.join(args.result_dir, args.task_name, args.method)
+    sc_save_dir = os.path.join(args.result_dir, args.task_name, args.method, "K_" + str(args.K))
     suffix = get_sc_model_suffix(args)
     sc_aux_file = os.path.join(sc_save_dir, "sc_model_{}.pickle".format(suffix))
     if os.path.exists(sc_aux_file):
@@ -96,7 +95,7 @@ def main():
             sc_tsne = tsne_trans.fit_transform(sc_H.T)
             print("reduce over.")
         except ValueError:
-            print("*"*9, "ERROR", "*"*9)
+            print("*" * 9, "ERROR", "*" * 9)
             print("method {} is invalid for task {}".format(args.method, args.task_name))
             return
 
@@ -107,7 +106,8 @@ def main():
     print("save H, TSNE, labels for single cells over.")
 
     # visualization
-    pic_path = os.path.join(args.result_dir, args.task_name, args.method, "sc_{}.pdf".format(suffix))
+    pic_path = os.path.join(args.result_dir, args.task_name, args.method, "K_" + str(args.K),
+                            "sc_{}.pdf".format(suffix))
     if not os.path.exists(pic_path):
         draw_and_save_figure(sc_tsne, labels, pic_path)
 

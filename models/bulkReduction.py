@@ -40,11 +40,11 @@ class BulkReduction(object):
 
     def train(self):
         p = progressbar.ProgressBar()
-        # self.prepare_input()
+        self.prepare_input()
         print("bulk model start training...")
         for _ in p(range(self.upd_time)):
             self.update()
-        # self.release()
+        self.release()
         print("bulk model train over.")
 
     def get_w(self):

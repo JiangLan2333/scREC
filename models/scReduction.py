@@ -82,11 +82,11 @@ class ScReduction(object):
     def train(self):
         p = progressbar.ProgressBar()
         if self.args.method != "pca":
-            # self.prepare_input()
+            self.prepare_input()
             print("sc model start training...")
             for _ in p(range(self.upd_time)):
                 self.update()
-            # self.release()
+            self.release()
         else:
             print("sc model start training...")
             self.update()
